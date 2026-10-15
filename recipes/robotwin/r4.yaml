@@ -1,0 +1,698 @@
+_target_: cosmos_framework.configs.base.config.Config
+model:
+  config:
+    tokenizer:
+      bucket_name: ''
+      object_store_credential_path_pretrained: ''
+      vae_path: /assets/required-01
+      chunk_duration: 93
+      keep_decoder_cache: false
+      use_streaming_encode: false
+      encode_chunk_frames:
+        '256': 68
+        '480': 24
+        '720': 12
+      encode_exact_durations:
+      - 65
+      - 97
+      spatial_compression_factor: 16
+      temporal_compression_factor: 4
+      temporal_window: null
+      encode_bucket_multiple: null
+      causal: true
+      _target_: cosmos_framework.model.vfm.tokenizers.wan2pt2_vae_4x16x16.Wan2pt2VAEInterface
+    net: null
+    ema:
+      enabled: true
+      rate: 0.1
+      iteration_shift: 0
+      _target_: cosmos_framework.configs.base.defaults.ema.EMAConfig
+    parallelism:
+      data_parallel_shard_degree: 8
+      data_parallel_replicate_degree: 16
+      context_parallel_shard_degree: 1
+      attention_io_layout: sequence_sharded
+      cfg_parallel_shard_degree: 1
+      enable_inference_mode: false
+      fsdp_master_dtype: float32
+      _target_: cosmos_framework.configs.base.defaults.parallelism.ParallelismConfig
+    compile:
+      enabled: false
+      compiled_region: language
+      compile_dynamic: true
+      use_cuda_graphs: false
+      max_autotune_pointwise: false
+      coordinate_descent_tuning: false
+      _target_: cosmos_framework.configs.base.defaults.compile.CompileConfig
+    activation_checkpointing:
+      mode: none
+      save_ops_regex:
+      - fmha
+      preserve_rng_state: true
+      determinism_check: default
+      _target_: cosmos_framework.configs.base.defaults.activation_checkpointing.ActivationCheckpointingConfig
+    precision: bfloat16
+    lora_enabled: false
+    lora_rank: 16
+    lora_alpha: 32
+    lora_target_modules: q_proj_moe_gen,k_proj_moe_gen,v_proj_moe_gen,o_proj_moe_gen
+    rectified_flow_training_config:
+      shift:
+        '256': 3
+        '480': 5
+        '720': 10
+      use_dynamic_shift: false
+      train_time_image_distribution: logitnormal
+      train_time_video_distribution: waver
+      train_time_action_distribution: logitnormal
+      train_time_sound_distribution: logitnormal
+      train_time_weight: uniform
+      loss_scale: 10.0
+      image_loss_scale: 1.0
+      sound_loss_scale: null
+      use_discrete_rf: false
+      action_loss_weight: 10.0
+      independent_action_schedule: false
+      shift_action: null
+      independent_sound_schedule: false
+      shift_sound: null
+      normalize_loss_by_active: true
+      _target_: cosmos_framework.configs.base.defaults.model_config.RectifiedFlowTrainingConfig
+    rectified_flow_inference_config:
+      scheduler_type: unipc
+      num_train_timesteps: 1000
+      shift: 1
+      use_dynamic_shifting: false
+      _target_: cosmos_framework.configs.base.defaults.model_config.RectifiedFlowInferenceConfig
+    fixed_step_sampler_config: null
+    vlm_config:
+      model_name: Qwen/Qwen3-VL-8B-Instruct
+      safetensors_path: ''
+      pretrained_weights:
+        enabled: false
+        backbone_path: s3://bucket0/cosmos3/pretrained/huggingface/Qwen/Qwen3-VL-8B-Instruct/
+        credentials_path: ''
+        enable_gcs_patch_in_boto3: true
+        checkpoint_format: null
+        _target_: cosmos_framework.configs.base.defaults.vlm.PretrainedWeightsConfig
+      model_instance:
+        config:
+          base_config:
+            json_file: cosmos_framework/model/vfm/vlm/qwen3_vl/configs/Qwen3-VL-8B-Instruct.json
+            _target_: cosmos_framework.model.vfm.mot.unified_mot._MoTConfigBase.from_json_file
+          freeze_und: false
+          layer_module: MoTDecoderLayer
+          qk_norm_for_text: true
+          tie_word_embeddings: true
+          _target_: cosmos_framework.configs.base.defaults.vlm.create_vlm_config
+        _target_: cosmos_framework.model.vfm.mot.unified_mot.Qwen3VLTextForCausalLM
+      tokenizer:
+        config_variant: hf
+        pretrained_model_name: Qwen/Qwen3-VL-8B-Instruct
+        _target_: cosmos_framework.configs.base.defaults.vlm.create_qwen2_tokenizer_with_download
+      layer_module: Qwen2MoTDecoderLayer
+      qk_norm: false
+      tie_word_embeddings: false
+      use_system_prompt: false
+      _target_: cosmos_framework.configs.base.defaults.vlm.VLMConfig
+    diffusion_expert_config:
+      timestep_range: 1.0
+      load_weights_from_pretrained: true
+      patch_spatial: 2
+      max_vae_latent_side_after_patchify: 20
+      position_embedding_type: unified_3d_mrope
+      rope_h_extrapolation_ratio: 1.0
+      rope_w_extrapolation_ratio: 1.0
+      rope_t_extrapolation_ratio: 1.0
+      enable_fps_modulation: true
+      base_fps: 24
+      sound_base_temporal_compression_factor: null
+      vision_temporal_position_mode: explicit_latent_index
+      unified_3d_mrope_reset_spatial_ids: true
+      unified_3d_mrope_temporal_modality_margin: 15000
+      _target_: cosmos_framework.configs.base.defaults.model_config.DiffusionExpertConfig
+    input_video_key: video
+    input_image_key: images
+    input_caption_key: ai_caption
+    state_ch: 48
+    state_t: 300
+    latent_downsample_factor: 16
+    resolution: '720'
+    max_num_tokens_after_packing: -1
+    joint_attn_implementation: two_way
+    natten_parameter_list: null
+    video_temporal_causal: false
+    video_block_causal: false
+    causal_training_strategy: none
+    lbl:
+      method: local
+      coeff_und: null
+      coeff_gen: null
+      _target_: cosmos_framework.configs.base.defaults.model_config.LBLConfig
+    vision_gen: true
+    action_gen: true
+    max_action_dim: 64
+    num_embodiment_domains: 32
+    agra_enabled: false
+    agra_weight: 0.01
+    agra_model_id: facebook/dinov2-base
+    agra_target_dim: 768
+    agra_input_size: 448
+    agra_max_frames_per_item: 4
+    agra_use_noisy_only: true
+    agra_use_offline_cache: false
+    agra_offline_mask_weight: 3.0
+    agra_offline_background_weight: 0.1
+    agra_dino_layer: -1
+    agra_model_layer: -1
+    agra_log_every_n: 0
+    prompt_contrastive_enabled: false
+    prompt_contrastive_weight: 0.05
+    prompt_contrastive_margin: 0.05
+    prompt_contrastive_apply_to:
+    - vision
+    - action
+    prompt_contrastive_start_iter: 0
+    behavior_domain_contrastive_enabled: false
+    behavior_domain_contrastive_weight: 0.02
+    behavior_domain_contrastive_margin: 0.05
+    behavior_domain_contrastive_start_iter: 0
+    behavior_domain_contrastive_ids:
+    - 17
+    - 18
+    - 19
+    behavior_domain_repulsion_enabled: false
+    behavior_domain_repulsion_weight: 0.01
+    behavior_domain_repulsion_margin: 0.02
+    sound_gen: false
+    sound_tokenizer: null
+    sound_dim: null
+    sound_latent_fps: 25
+    log_enc_time_every_n: 100
+    exclude_reasoner_weights_from_checkpoint: false
+    _target_: cosmos_framework.configs.base.defaults.model_config.OmniMoTModelConfig
+  _recursive_: false
+  _target_: cosmos_framework.model.vfm.omni_mot_model.OmniMoTModel
+optimizer:
+  model: null
+  optimizer_type: FusedAdam
+  lr: 1.0e-05
+  weight_decay: 0.05
+  betas:
+  - 0.9
+  - 0.99
+  eps: 1.0e-08
+  fused: true
+  keys_to_select:
+  - moe_gen
+  - time_embedder
+  - vae2llm
+  - llm2vae
+  - action2llm
+  - llm2action
+  - action_modality_embed
+  - action_pos_embed
+  lr_multipliers:
+    action2llm: 5.0
+    llm2action: 5.0
+    action_modality_embed: 5.0
+    action_pos_embed: 5.0
+  disable_weight_decay_for_1d_params: false
+  _target_: cosmos_framework.utils.vfm.optimizer.build_optimizer
+scheduler:
+  optimizer: null
+  lr_scheduler_type: LambdaCosine
+  warm_up_steps:
+  - 0
+  cycle_lengths:
+  - 1000
+  f_start:
+  - 1.0
+  f_max:
+  - 1.0
+  f_min:
+  - 1.0
+  _target_: cosmos_framework.utils.vfm.optimizer.build_lr_scheduler
+  verbosity_interval: 0
+dataloader_train:
+  _target_: cosmos_framework.data.vfm.joint_dataloader.IterativeJointDataLoader
+  audio_sample_rate: 48000
+  dataloaders:
+    base:
+      dataloader:
+        _target_: torch.utils.data.DataLoader
+        batch_sampler: null
+        batch_size: 1
+        collate_fn: null
+        dataset:
+          _target_: cosmos_framework.data.vfm.action.datasets.robotwin_preprocessed_dataset.get_robotwin_preprocessed_video_sft_dataset
+          append_duration_fps_timestamps: false
+          append_resolution_info: false
+          append_view_description: false
+          append_viewpoint_info: false
+          ar_condition_latent_prefixes: null
+          ar_condition_seed: 42
+          ar_latent_chunk_size: 4
+          ar_num_chunks: 2
+          bootstrap_sampling_slots: '32'
+          cfg_dropout_rate: 0.1
+          chunk_length: 64
+          episode_shuffle_seed: 20260904
+          history_length: 32
+          iterable_shuffle: true
+          mode: image2video_state_action_globalsink
+          resolution: '480'
+          root: /assets/required-02
+          terminal_hold_steps: 30
+          tokenizer_config:
+            _target_: cosmos_framework.configs.base.defaults.vlm.create_qwen2_tokenizer_with_download
+            config_variant: hf
+            pretrained_model_name: Qwen/Qwen3-VL-8B-Instruct
+          video_step: 1
+          video_temporal_downsample: 4
+        drop_last: false
+        generator: null
+        in_order: false
+        multiprocessing_context: null
+        num_workers: 1
+        persistent_workers: true
+        pin_memory: true
+        pin_memory_device: ''
+        prefetch_factor: 1
+        sampler: null
+        shuffle: null
+        timeout: 0
+        worker_init_fn: null
+      ratio: 95
+    d2:
+      dataloader:
+        _target_: torch.utils.data.DataLoader
+        batch_sampler: null
+        batch_size: 1
+        collate_fn: null
+        dataset:
+          _target_: cosmos_framework.data.vfm.action.datasets.robotwin_hdf5_i2v64_dataset.get_robotwin_long_d2d4_dense_globalsink_dataset
+          append_duration_fps_timestamps: false
+          append_resolution_info: false
+          append_viewpoint_info: false
+          cfg_dropout_rate: 0.1
+          data_type: d2
+          episode_shuffle_seed: 20260911
+          include_d2_reference_pairs: true
+          iterable_shuffle: true
+          manifest_path: /assets/required-03
+          resolution: '480'
+          tokenizer_config:
+            _target_: cosmos_framework.configs.base.defaults.vlm.create_qwen2_tokenizer_with_download
+            config_variant: hf
+            pretrained_model_name: Qwen/Qwen3-VL-8B-Instruct
+        drop_last: false
+        generator: null
+        in_order: false
+        multiprocessing_context: null
+        num_workers: 1
+        persistent_workers: true
+        pin_memory: true
+        pin_memory_device: ''
+        prefetch_factor: 1
+        sampler: null
+        shuffle: null
+        timeout: 0
+        worker_init_fn: null
+      ratio: 2
+    d4:
+      dataloader:
+        _target_: torch.utils.data.DataLoader
+        batch_sampler: null
+        batch_size: 1
+        collate_fn: null
+        dataset:
+          _target_: cosmos_framework.data.vfm.action.datasets.robotwin_hdf5_i2v64_dataset.get_robotwin_long_d2d4_dense_globalsink_dataset
+          append_duration_fps_timestamps: false
+          append_resolution_info: false
+          append_viewpoint_info: false
+          cfg_dropout_rate: 0.1
+          data_type: d4
+          episode_shuffle_seed: 20260912
+          include_d2_reference_pairs: false
+          iterable_shuffle: true
+          manifest_path: /assets/required-03
+          resolution: '480'
+          tokenizer_config:
+            _target_: cosmos_framework.configs.base.defaults.vlm.create_qwen2_tokenizer_with_download
+            config_variant: hf
+            pretrained_model_name: Qwen/Qwen3-VL-8B-Instruct
+        drop_last: false
+        generator: null
+        in_order: false
+        multiprocessing_context: null
+        num_workers: 1
+        persistent_workers: true
+        pin_memory: true
+        pin_memory_device: ''
+        prefetch_factor: 1
+        sampler: null
+        shuffle: null
+        timeout: 0
+        worker_init_fn: null
+      ratio: 3
+    adaptation:
+      dataloader:
+        _target_: torch.utils.data.DataLoader
+        batch_sampler: null
+        batch_size: 1
+        collate_fn: null
+        dataset:
+          _target_: cosmos_framework.data.vfm.action.datasets.robotwin_balanced_adaptation.get_balanced_adaptation_dataset
+          manifest_path: /assets/required-13
+          seed: 20260907
+        drop_last: false
+        generator: null
+        in_order: false
+        multiprocessing_context: null
+        num_workers: 1
+        persistent_workers: true
+        pin_memory: true
+        pin_memory_device: ''
+        prefetch_factor: 1
+        sampler: null
+        shuffle: null
+        timeout: 0
+        worker_init_fn: null
+      ratio: 100
+  default_lookahead_limit: 10
+  lookahead_limits: null
+  max_samples_per_batch: 1
+  max_sequence_length: null
+  patch_spatial: 2
+  prewarm: true
+  schedule_mode: smooth_weighted
+  seed: 20260904
+  shard_datasets_by_rank: true
+  sound_latent_fps: 0
+  tokenizer_spatial_compression_factor: 16
+  tokenizer_temporal_compression_factor: 4
+  uniae_chunk_frames: null
+  uniae_pad_frames: null
+dataloader_val: null
+job:
+  _target_: cosmos_framework.utils.config.JobConfig
+  project: evo_cosmos3_robotwin
+  group: robotwin_qwen_adaptation
+  name: robotwin_R4
+  wandb_mode: disabled
+  cluster: null
+trainer:
+  _target_: cosmos_framework.utils.config.TrainerConfig
+  type: cosmos_framework.trainer.ImaginaireTrainer
+  callbacks:
+    iter_speed:
+      hit_thres: 50
+      save_s3: false
+      save_s3_every_log_n: 500
+      every_n: 10
+      _target_: cosmos_framework.callbacks.iter_speed.IterSpeed
+    manual_gc:
+      warm_up: 1
+      gc_level: 1
+      every_n: 5
+      _target_: cosmos_framework.callbacks.manual_gc.ManualGarbageCollection
+    wandb:
+      config: null
+      trainer: null
+      _target_: cosmos_framework.utils.callback.WandBCallback
+    wandb_2x:
+      logging_iter_multipler: 2
+      save_logging_iter_multipler: 1
+      save_s3: false
+      _target_: cosmos_framework.callbacks.wandb_log.WandbCallback
+    param_count:
+      save_s3: false
+      _target_: cosmos_framework.callbacks.param_count.ParamCount
+    wandb_val:
+      save_s3: false
+      _target_: cosmos_framework.callbacks.wandb_log_eval.WandbCallback
+    moe_stability:
+      every_n: 250
+      _target_: cosmos_framework.callbacks.moe_stability_callback.MoEStabilityCallback
+    moe_specialization:
+      every_n: 250
+      _target_: cosmos_framework.callbacks.moe_specialization_callback.MoESpecializationCallback
+    expert_heatmap:
+      every_n: 1000
+      _target_: cosmos_framework.callbacks.expert_heatmap.ExpertHeatmap
+    load_pretrained:
+      config: null
+      trainer: null
+      _target_: cosmos_framework.callbacks.load_pretrained.LoadPretrained
+    compile_tokenizer:
+      enabled: false
+      compile_after_iterations: 3
+      warmup_resolutions: null
+      backend: inductor
+      mode: reduce-overhead
+      fullgraph: false
+      dynamic: false
+      _target_: cosmos_framework.callbacks.compile_tokenizer.CompileTokenizer
+    norm_monitor:
+      every_n: 5000
+      step_size: 1
+      layer_norm_only: false
+      model_key: null
+      log_stat_wandb: true
+      save_s3: false
+      track_activations: true
+      _target_: cosmos_framework.callbacks.norm_monitor.NormMonitor
+    sigma_loss_analysis:
+      every_n: 5000
+      every_n_viz: 5000
+      save_s3: false
+      _target_: cosmos_framework.callbacks.sigma_loss_analysis.SigmaLossAnalysis
+    sequence_packing_padding:
+      every_n: 10
+      _target_: cosmos_framework.callbacks.sequence_packing_padding.SequencePackingPadding
+    mfu:
+      backwardpass_ratio: 2.0
+      hit_thres: 5
+      include_vae_encoder: true
+      include_padding: true
+      grad_accum_iter: 2
+      every_n: 10
+      _target_: cosmos_framework.callbacks.mfu.MFUCallback
+    ofu:
+      hit_thres: 5
+      every_n: 10
+      _target_: cosmos_framework.callbacks.ofu.OFUCallback
+    skip_nan_step:
+      max_consecutive_nan: 100
+      _target_: cosmos_framework.callbacks.skip_nan_step.SkipNaNStep
+    grad_clip:
+      clip_norm: 1.0
+      force_finite: true
+      track_per_modality: true
+      _target_: cosmos_framework.callbacks.grad_clip.GradClip
+    low_precision:
+      update_iter: 1
+      config: null
+      trainer: null
+      _target_: cosmos_framework.utils.callback.LowPrecisionCallback
+    heart_beat:
+      step_size: 1
+      update_interval_in_minute: 20
+      save_s3: false
+      every_n: 200
+      _target_: cosmos_framework.callbacks.heart_beat.HeartBeat
+    device_monitor:
+      every_n: 5000
+      step_size: 1
+      save_s3: false
+      upload_every_n_mul: 5
+      log_memory_detail: true
+      _target_: cosmos_framework.callbacks.device_monitor.DeviceMonitor
+    termination_signal_checkpoint:
+      min_save_fraction: 0.3333333333333333
+      _target_: cosmos_framework.callbacks.termination_signal_checkpoint.TerminationSignalCheckpoint
+    dataloader_speed:
+      every_n: 100
+      save_s3: false
+      step_size: 1
+    training_stats:
+      log_freq: 100
+    sft_audit:
+      _target_: cosmos_framework.callbacks.robotwin_sft_audit.SftAudit
+      root: /assets/required-14
+  distributed_parallelism: fsdp
+  ddp:
+    _target_: cosmos_framework.utils.config.DDPConfig
+    find_unused_parameters: false
+    static_graph: true
+    broadcast_buffers: true
+  cudnn:
+    _target_: cosmos_framework.utils.config.CuDNNConfig
+    deterministic: false
+    benchmark: true
+  seed: 42
+  grad_scaler_args:
+    enabled: false
+  max_iter: 1000
+  max_val_iter: null
+  logging_iter: 10
+  run_validation: false
+  validation_iter: 100
+  run_validation_on_start: false
+  timeout_period: 999999999
+  memory_format: torch.preserve_format
+  grad_accum_iter: 2
+  straggler_detection:
+    _target_: cosmos_framework.utils.config.StragglerDetectionConfig
+    enabled: false
+    report_freq: 100
+    profile_freq: 1
+    max_diff: 2.0
+    raise_error: true
+    analyze_forward: true
+    analyze_backward: true
+    analyze_optimizer: true
+    analyze_dataloading: true
+    save_s3: false
+  profiling:
+    _target_: cosmos_framework.utils.config.Profiling
+    enable_profiling: false
+    enable_nsys: false
+    enable_memory_snapshot: false
+    save_s3: false
+    profile_freq: 1
+    profile_warmup: 3
+    target_ranks:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    record_shape: false
+    profile_memory: false
+    with_stack: true
+    with_modules: true
+  compile_config:
+    _target_: cosmos_framework.utils.config.CompileConfig
+    recompile_limit: 8
+    use_duck_shape: false
+  save_zero_checkpoint: false
+model_parallel:
+  _target_: megatron.core.model_parallel_config.ModelParallelConfig
+  tensor_model_parallel_size: 1
+  pipeline_model_parallel_comm_backend: null
+  pipeline_model_parallel_size: 1
+  virtual_pipeline_model_parallel_size: null
+  sequence_parallel: false
+  context_parallel_size: 1
+  hierarchical_context_parallel_sizes: null
+  expert_model_parallel_size: 1
+  expert_tensor_parallel_size: 1
+  moe_extended_tp: false
+  perform_initialization: true
+  use_cpu_initialization: false
+  fp16: false
+  bf16: false
+  params_dtype: torch.float32
+  timers: null
+  finalize_model_grads_func: null
+  grad_scale_func: null
+  no_sync_func: null
+  grad_sync_func: null
+  param_sync_func: null
+  deterministic_mode: false
+  enable_autocast: false
+  autocast_dtype: torch.float32
+  num_microbatches_with_partial_activation_checkpoints: null
+  gradient_accumulation_fusion: false
+  async_tensor_model_parallel_allreduce: false
+  use_te_rng_tracker: false
+  tp_comm_overlap: false
+  tp_comm_bulk_wgrad: true
+  tp_comm_bulk_dgrad: true
+  tp_comm_overlap_ag: true
+  tp_comm_overlap_rs: true
+  tp_comm_overlap_rs_dgrad: false
+  tp_comm_split_ag: true
+  tp_comm_atomic_ag: false
+  tp_comm_split_rs: true
+  tp_comm_atomic_rs: false
+  cross_entropy_loss_fusion: false
+  cross_entropy_fusion_impl: native
+  tp_comm_overlap_disable_qkv: false
+  tp_comm_overlap_disable_fc1: false
+  tp_comm_bootstrap_backend: nccl
+  overlap_moe_expert_parallel_comm: false
+  delay_wgrad_compute: false
+  ep_overlap_early_attn_memory_release: false
+  pipeline_dtype: null
+  variable_seq_lengths: false
+  overlap_p2p_comm: false
+  batch_p2p_comm: true
+  batch_p2p_sync: true
+  use_ring_exchange_p2p: false
+  deallocate_pipeline_outputs: false
+  defer_embedding_wgrad_compute: false
+  wgrad_deferral_limit: 0
+  overlap_p2p_comm_warmup_flush: false
+  microbatch_group_size_per_vp_stage: 1
+  cpu_offloading: false
+  cpu_offloading_num_layers: 0
+  _cpu_offloading_context: null
+  cpu_offloading_activations: true
+  cpu_offloading_weights: false
+  cpu_offloading_double_buffering: false
+  barrier_with_L1_time: true
+checkpoint:
+  _target_: cosmos_framework.utils.config.CheckpointConfig
+  type:
+    callbacks: null
+    disable_async: false
+    _target_: cosmos_framework.checkpoint.dcp.DistributedCheckpointer
+  dcp_async_mode_enabled: false
+  save_to_object_store:
+    _target_: cosmos_framework.utils.config.ObjectStoreConfig
+    enabled: false
+    credentials: ''
+    bucket: ''
+  save_iter: 1000
+  strict_resume: false
+  load_from_object_store:
+    _target_: cosmos_framework.utils.config.ObjectStoreConfig
+    enabled: false
+    credentials: ''
+    bucket: ''
+  load_path: /assets/required-15
+  load_training_state: false
+  only_load_scheduler_state: false
+  keys_to_skip_loading: []
+  jit:
+    _target_: cosmos_framework.utils.config.JITConfig
+    enabled: false
+    input_shape: null
+    device: cuda
+    dtype: bfloat16
+    strict: true
+  verbose: true
+  keys_not_to_resume: []
+  broadcast_via_filesystem: false
+  load_ema_to_reg: false
+  enable_gcs_patch_in_boto3: true
+  hf_export:
+    _target_: cosmos_framework.utils.config.HFExportConfig
+    enabled: false
+    hf_repo_id: null
+    upload_to_object_store:
+      _target_: cosmos_framework.utils.config.ObjectStoreConfig
+      enabled: false
+      credentials: ''
+      bucket: ''
+    export_every_n: 1
+upload_reproducible_setup: false
+data_setting:
+  _target_: cosmos_framework.configs.base.config.DataSetting
+  qwen_max_video_token_length: 8192

@@ -1,0 +1,14 @@
+--- a/cosmos_framework/inference/robotwin_dense_http_client.py
++++ b/cosmos_framework/inference/robotwin_dense_http_client.py
+@@ -156,6 +156,11 @@
+             "state": self.real_states[0],
+         }
+         write_json(self.root.parent / "initial_condition.json", condition)
++        if os.environ.get('DENSE_SAVE_LOSSLESS_RGB') == '1':
++            initial = {camera+'_rgb': values['rgb']
++                       for camera, values in observation['observation'].items() if 'rgb' in values}
++            initial['q0'] = np.asarray(observation['joint_action']['vector'], dtype=np.float32)
++            np.savez_compressed(self.root.parent/'initial_observation.npz', **initial)
+ 
+     def record_lossless_rgb(self, frame):
+         if self.rgb_file is None:

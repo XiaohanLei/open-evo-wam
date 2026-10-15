@@ -1,0 +1,80 @@
+{
+  "scope": "standalone numerical R1-R4 recipe bindings; actual pipeline overrides generated pool and parent checkpoint",
+  "assets": [
+    {
+      "alias": "/assets/required-01",
+      "role": "wan_vae",
+      "description": "Wan2.2 VAE checkpoint file"
+    },
+    {
+      "alias": "/assets/required-02",
+      "role": "base_training_data",
+      "description": "Base native preprocessed RoboTwin dataset directory"
+    },
+    {
+      "alias": "/assets/required-03",
+      "role": "auxiliary_samples",
+      "description": "Auxiliary sample manifest JSON"
+    },
+    {
+      "alias": "/assets/required-04",
+      "role": "adaptation_manifest",
+      "description": "Round 1 adaptation manifest"
+    },
+    {
+      "alias": "/assets/required-05",
+      "role": "adaptation_root",
+      "description": "Round 1 adaptation root"
+    },
+    {
+      "alias": "/assets/required-06",
+      "role": "initial_wam_checkpoint",
+      "description": "Initial complete WAM checkpoint directory"
+    },
+    {
+      "alias": "/assets/required-07",
+      "role": "adaptation_manifest",
+      "description": "Round 2 adaptation manifest"
+    },
+    {
+      "alias": "/assets/required-08",
+      "role": "adaptation_root",
+      "description": "Round 2 adaptation root"
+    },
+    {
+      "alias": "/assets/required-09",
+      "role": "previous_round_checkpoint",
+      "description": "Round 2 previous round checkpoint"
+    },
+    {
+      "alias": "/assets/required-10",
+      "role": "adaptation_manifest",
+      "description": "Round 3 adaptation manifest"
+    },
+    {
+      "alias": "/assets/required-11",
+      "role": "adaptation_root",
+      "description": "Round 3 adaptation root"
+    },
+    {
+      "alias": "/assets/required-12",
+      "role": "previous_round_checkpoint",
+      "description": "Round 3 previous round checkpoint"
+    },
+    {
+      "alias": "/assets/required-13",
+      "role": "adaptation_manifest",
+      "description": "Round 4 adaptation manifest"
+    },
+    {
+      "alias": "/assets/required-14",
+      "role": "adaptation_root",
+      "description": "Round 4 adaptation root"
+    },
+    {
+      "alias": "/assets/required-15",
+      "role": "previous_round_checkpoint",
+      "description": "Round 4 previous round checkpoint"
+    }
+  ]
+}

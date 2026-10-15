@@ -1,0 +1,13 @@
+schema: evo-wam.pipeline.v1
+run_dir: ${RUN_OUTPUT}
+stages:
+  idm-calibrate:
+    requires_previous: false
+    python: ${IDM_PYTHON}
+    adapter: evo_wam.adapters.idm_calibration:calibrate
+    interface: dense
+    manifest: ${IDM_CALIBRATION_MANIFEST}
+    scores: ${IDM_CALIBRATION_SCORES}
+    checkpoint_export_sha256: ${IDM_CALIBRATION_CHECKPOINT_SHA256}
+variables:
+  PACKAGE_ROOT: ${CONFIG_DIR}/..

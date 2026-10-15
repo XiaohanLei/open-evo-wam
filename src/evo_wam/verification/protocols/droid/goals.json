@@ -1,0 +1,44 @@
+{
+  "stack_bowls_v2": [
+    {
+      "label": "粉碗叠到蓝碗上并释放",
+      "focus": "Inspect the bowls identifiable from INITIAL as pink, blue, and white, plus any additional or altered bowl-like forms actually visible. Report distinct rims/openings and bowl bodies, allowing nested bodies to be partly hidden. For each actual group, state the observable TOP-to-BOTTOM identities and directed support edges ('X is supported by Y'), or name the unresolved layer; also list bowls separate from that group. Do not count a colored rim and pale body as separate bowls without independent object boundaries. Describe gripper-to-rim contact, pinching, and apparent support. Do not assume any preferred color order.",
+      "rule": "The original pink bowl is directly supported by/nested on the original blue bowl. There must not be another bowl between pink and blue. A separate blue bowl or pink supported by white contradicts this relation. No condition on the white bowl's location at this stage. Assess release separately. Nesting is allowed; do not demand a gap or fully exposed bodies, but overlap alone is not support.",
+      "release_required": true
+    },
+    {
+      "label": "粉蓝组合叠到白碗上并释放",
+      "focus": "Inspect the bowls identifiable from INITIAL as pink, blue, and white, plus any additional or altered bowl-like forms actually visible. Report distinct rims/openings and bowl bodies, allowing nested bodies to be partly hidden. For each actual group, state the observable TOP-to-BOTTOM identities and directed support edges ('X is supported by Y'), or name the unresolved layer; also list bowls separate from that group. Do not count a colored rim and pale body as separate bowls without independent object boundaries. Describe gripper-to-rim contact, pinching, and apparent support. Do not assume any preferred color order.",
+      "rule": "The original bowls currently form one supported group with TOP-to-BOTTOM order pink, blue, white: pink is directly supported by/nested on blue, and blue is directly supported by/nested on white. White is the bottom bowl, not the top or middle, and is not separate or held beside the pair. Check both support edges now even though the first subgoal passed earlier. Nesting is allowed; three fully exposed bodies or gaps are not required. Partially visible boundaries may support identity; absent evidence cannot be supplied by splitting one bowl into two or imagining a hidden layer. Assess release separately.",
+      "release_required": true
+    }
+  ],
+  "two_ducks_droidstyle_g5": [
+    {
+      "label": "粉鸭放入粉碗并释放",
+      "focus": "Inspect toy ducks and bowls: duck head/beak/body versus a container's independent rim, opening, and interior. Describe each distinct duck and bowl and which, if any, contains which; note separate empty bowls and ducks resting on the table. Do not count a duck's rounded body as its bowl, or a colored beak as another duck. Compare features across informative views, allowing pale colors under lighting. Report gripper contact and grasp ambiguity. Do not assume color matching or containment.",
+      "rule": "The original pink toy duck is visibly contained in the original pink bowl. Identify the duck and its distinct container using the actual rim/interior; overlap or a duck-shaped rounded body alone is insufficient. No condition on the blue duck's placement at this stage. Assess release separately.",
+      "release_required": true
+    },
+    {
+      "label": "蓝鸭放入蓝碗，粉鸭仍在粉碗",
+      "focus": "Inspect toy ducks and bowls: duck head/beak/body versus a container's independent rim, opening, and interior. Describe each distinct duck and bowl and which, if any, contains which; note separate empty bowls and ducks resting on the table. Do not count a duck's rounded body as its bowl, or a colored beak as another duck. Compare features across informative views, allowing pale colors under lighting. Report gripper contact and grasp ambiguity. Do not assume color matching or containment.",
+      "rule": "The original blue duck is inside the original blue bowl and the original pink duck remains inside the original pink bowl now. Recheck both distinct duck/container pairs. An original target bowl visibly empty elsewhere contradicts the corresponding containment claim. Do not count the duck body as the bowl or a beak as another duck. Occlusion or pale color is not absence, but unresolved containment is uncertain. Assess release separately.",
+      "release_required": true
+    }
+  ],
+  "operate_drawer_old_prompt": [
+    {
+      "label": "握红把手打开抽屉",
+      "focus": "Inspect the air-fryer body, drawer, red handle, bread, plate, and gripper. In each phase describe visible drawer extension/gap/interior relative to its housing, and actual handle engagement or separation. Describe the distinct bread boundary/texture and its observed location relative to plate and drawer; explicitly report bread still visible on the plate, a visibly empty drawer, or an occluded location. A light patch or reflection without an independent bread boundary is not another loaf. Describe grasp/support. Do not assume that a transfer or opening happened.",
+      "rule": "The air-fryer drawer is visibly extended/open relative to INITIAL, with visible gripper engagement/contact at the red handle. Check the opening relative to the housing and actual handle engagement separately: a hand merely nearby or an unchanged closed front is insufficient. This certifies the visible opening state change, not unobserved pulling motion. No release is required. Do not require bread to remain on the plate or later subgoals to remain incomplete.",
+      "release_required": false
+    },
+    {
+      "label": "面包放入抽屉并释放",
+      "focus": "Inspect the air-fryer body, drawer, red handle, bread, plate, and gripper. In each phase describe visible drawer extension/gap/interior relative to its housing, and actual handle engagement or separation. Describe the distinct bread boundary/texture and its observed location relative to plate and drawer; explicitly report bread still visible on the plate, a visibly empty drawer, or an occluded location. A light patch or reflection without an independent bread boundary is not another loaf. Describe grasp/support. Do not assume that a transfer or opening happened.",
+      "rule": "The original bread from the plate is visibly inside and supported by the air-fryer drawer. If that original bread is clearly still on the plate, the transfer is not complete; a light patch/reflection inside the drawer does not override this. A hidden source is not proof of transfer, and an obscured bread location is uncertain rather than disappearance. The drawer may remain open; closing is not required. Assess release separately.",
+      "release_required": true
+    }
+  ]
+}

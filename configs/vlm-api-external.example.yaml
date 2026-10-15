@@ -1,0 +1,6 @@
+# Merge these fields into stages.verify; bind endpoint/model privately.
+endpoint: ${VLM_ENDPOINT}
+model: ${VLM_MODEL}
+model_revision: ${VLM_MODEL_REVISION}
+api_key_env: EVO_VLM_API_KEY
+max_tokens: 12288

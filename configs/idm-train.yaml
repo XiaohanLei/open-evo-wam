@@ -1,0 +1,32 @@
+schema: evo-wam.pipeline.v1
+run_dir: ${RUN_OUTPUT}
+stages:
+  idm-train:
+    requires_previous: false
+    python: ${IDM_PYTHON}
+    adapter: evo_wam.adapters.idm_training:train
+    source_root: ${NATIVE_ROOT}/idm_dense
+    interface: dense
+    report: ${PREPARED_IDM_REPORT}
+    bindings_file: ${IDM_PATH_BINDINGS}
+    world_size: 8
+    steps: 50000
+    batch: 4
+    accumulation: 8
+    workers: 4
+    launcher:
+    - ${IDM_PYTHON}
+    - -m
+    - torch.distributed.run
+    - --standalone
+    - --nnodes=1
+    - --nproc-per-node=8
+    inputs:
+    - ${PREPARED_IDM_REPORT}/model_config.json
+    - ${PREPARED_IDM_REPORT}/data/GPU_READY.json
+    - ${PREPARED_IDM_REPORT}/data/train.jsonl
+    - ${PREPARED_IDM_REPORT}/data/select_fixtures.json
+    - ${PREPARED_IDM_REPORT}/data/statistics.json
+    historical_gate_sha256: ${FROZEN_IDM_GATE_SHA256}
+variables:
+  PACKAGE_ROOT: ${CONFIG_DIR}/..

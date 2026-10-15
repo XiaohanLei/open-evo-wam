@@ -1,0 +1,58 @@
+schema: evo-wam.pipeline.v1
+run_dir: ${RUN_OUTPUT}
+initial_checkpoint: ${PARENT_CHECKPOINT_PATH}
+stages:
+  generate:
+    python: ${COSMOS_PYTHON}
+    adapter: evo_wam.adapters.cosmos:generate_robotwin
+    source_root: ${NATIVE_ROOT}/cosmos_robotwin_inference
+    train_config: ${MODEL_TRAIN_CONFIG}
+    statistics: ${MODEL_STATISTICS}
+    jobs: ${GENERATION_JOBS}
+    initial_format: robotwin_registry
+    num_steps: 30
+    guidance: 1.0
+    shift: 5.0
+    env:
+      CUDA_VISIBLE_DEVICES: ${VALIDATION_GPU}
+      COSMOS_TRAINING: '0'
+      COSMOS_INTERNAL: '0'
+      HF_HUB_OFFLINE: '1'
+      TRANSFORMERS_OFFLINE: '1'
+  verify:
+    python: ${IDM_PYTHON}
+    adapter: evo_wam.verification.robotwin:verify
+    source_root: ${NATIVE_ROOT}/idm_dense
+    idm_checkpoint: ${IDM_CHECKPOINT}
+    tokenizer: ${UMT5_TOKENIZER}
+    interface: dense
+    backbone: cosmos3-robotwin
+    visual_protocol: robotwin_dense
+    seed_namespace: evo-wam-robotwin-R${ROUND}
+    threshold: 0.004184869576192262
+    scan_start_seconds:
+      place_empty_cup: 8
+    endpoint: ${VLM_ENDPOINT}
+    model: ${VLM_MODEL}
+    model_revision: ${VLM_MODEL_REVISION}
+    max_tokens: 2048
+    format_instructions: ${PACKAGE_ROOT}/configs/vlm-qwen-small-format.json
+    vote_timing: per_moment
+    env:
+      CUDA_VISIBLE_DEVICES: ${VALIDATION_GPU}
+      HF_HUB_OFFLINE: '1'
+      TRANSFORMERS_OFFLINE: '1'
+    inputs:
+      - ${IDM_CHECKPOINT}
+      - ${UMT5_TOKENIZER}
+  export-prefix:
+    python: ${COSMOS_PYTHON}
+    adapter: evo_wam.data.robotwin_dense_online:export
+    source_root: ${NATIVE_ROOT}/cosmos_robotwin_inference
+    statistics: ${MODEL_STATISTICS}
+    loader_template: ${NATIVE_LOADER_MANIFEST}
+    threshold: 0.004184869576192262
+    cumulative: true
+    selection_description: Native dense IDM consistency filtering then chronological fixed-point vote3
+variables:
+  PACKAGE_ROOT: ${CONFIG_DIR}/..

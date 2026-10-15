@@ -1,0 +1,44 @@
+{
+  "authorized_tasks": [
+    "place_empty_cup",
+    "place_bread_basket",
+    "stamp_seal",
+    "place_object_scale",
+    "place_a2b_left",
+    "place_cans_plasticbox",
+    "stack_blocks_three"
+  ],
+  "bootstrap_sampling_slots": 32,
+  "terminal_hold_steps": 30,
+  "raw_loader_kwargs": {
+    "chunk_length": 64,
+    "mode": "image2video_state_action_globalsink",
+    "history_length": 32,
+    "terminal_hold_steps": 30,
+    "bootstrap_sampling_slots": 32,
+    "resolution": "480",
+    "video_step": 1,
+    "video_temporal_downsample": 4,
+    "append_view_description": false
+  },
+  "loader_kwargs": {
+    "chunk_length": 64,
+    "mode": "image2video_state_action_globalsink",
+    "history_length": 32,
+    "terminal_hold_steps": 30,
+    "bootstrap_sampling_slots": 32,
+    "resolution": "480",
+    "video_step": 1,
+    "video_temporal_downsample": 4,
+    "append_view_description": false,
+    "tokenizer_config": {
+      "_target_": "cosmos_framework.configs.base.defaults.vlm.create_qwen2_tokenizer_with_download",
+      "config_variant": "hf",
+      "pretrained_model_name": "Qwen/Qwen3-VL-8B-Instruct"
+    },
+    "cfg_dropout_rate": 0.1,
+    "append_viewpoint_info": false,
+    "append_duration_fps_timestamps": false,
+    "append_resolution_info": false
+  }
+}

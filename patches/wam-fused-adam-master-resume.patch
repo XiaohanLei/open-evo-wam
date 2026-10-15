@@ -1,0 +1,54 @@
+--- a/cosmos_framework/utils/vfm/fused_adam.py
++++ b/cosmos_framework/utils/vfm/fused_adam.py
+@@ -133,7 +133,7 @@
+                 self.param_groups_master.append(
+                     {
+                         # Change related to master weights
+-                        "params": [p.clone().detach().float() if self.master_weights else None for p in param_list],
++                        "params": [self._master_parameter(p) if self.master_weights else None for p in param_list],
+                     }
+                 )
+ 
+@@ -184,7 +184,7 @@
+ 
+                 state = self.state[p]
+                 # State initialization
+-                if len(state) == 0:
++                if "exp_avg" not in state:
+                     # Exponential moving average of gradient values
+                     state["exp_avg"] = torch.zeros_like(p).float()
+                     # Exponential moving average of squared gradient values
+@@ -341,8 +341,33 @@
+ 
+         return loss
+ 
++    def _master_parameter(self, parameter):
++        # Keep FP32 masters in optimizer state so DCP includes them in new saves.
++        state = self.state[parameter]
++        if "master_param" not in state:
++            state["master_param"] = parameter.clone().detach().float()
++        return state["master_param"]
++
+     def load_state_dict(self, state_dict):
++        # torch Optimizer.load_state_dict casts floating state to parameter dtype.
++        # Preserve original FP32 moments/masters before that BF16/FP16 cast.
++        fp32_buffers = {}
++        for current, saved in zip(self.param_groups, state_dict["param_groups"]):
++            for parameter, identifier in zip(current["params"], saved["params"]):
++                incoming = state_dict["state"].get(identifier, {})
++                fp32_buffers[parameter] = {
++                    key: incoming[key] for key in ("exp_avg", "exp_avg_sq", "master_param")
++                    if key in incoming
++                }
+         super().load_state_dict(state_dict)
++        for parameter, buffers in fp32_buffers.items():
++            for key, value in buffers.items():
++                self.state[parameter][key] = value.to(device=parameter.device, dtype=torch.float32)
++        # Rebind the cache to the restored state on the next step.
++        self.param_groups_master = None
++        self.master_state_restored = all("master_param" in buffers for buffers in fp32_buffers.values())
++        if self.master_weights and fp32_buffers and not self.master_state_restored:
++            log.warning("Legacy optimizer checkpoint lacks FP32 master weights; exact resume is unavailable.")
+         for group in self.param_groups:
+             if self.capturable:
+                 group["lr"] = (

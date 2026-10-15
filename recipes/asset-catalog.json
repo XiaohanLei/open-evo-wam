@@ -1,0 +1,108 @@
+{
+  "/assets/required-01": {
+    "used_in_recipe_fields": [
+      "model.config.tokenizer.vae_path"
+    ],
+    "resolved_by": "MODEL_ASSET_BINDINGS",
+    "private_original_path_in_git": false
+  },
+  "/assets/required-02": {
+    "used_in_recipe_fields": [
+      "dataloader_train.dataloaders.base.dataloader.dataset.root"
+    ],
+    "resolved_by": "MODEL_ASSET_BINDINGS",
+    "private_original_path_in_git": false
+  },
+  "/assets/required-03": {
+    "used_in_recipe_fields": [
+      "dataloader_train.dataloaders.d2.dataloader.dataset.manifest_path",
+      "dataloader_train.dataloaders.d4.dataloader.dataset.manifest_path"
+    ],
+    "resolved_by": "MODEL_ASSET_BINDINGS",
+    "private_original_path_in_git": false
+  },
+  "/assets/required-04": {
+    "used_in_recipe_fields": [
+      "dataloader_train.dataloaders.adaptation.dataloader.dataset.manifest_path"
+    ],
+    "resolved_by": "MODEL_ASSET_BINDINGS",
+    "private_original_path_in_git": false
+  },
+  "/assets/required-05": {
+    "used_in_recipe_fields": [
+      "trainer.callbacks.sft_audit.root"
+    ],
+    "resolved_by": "MODEL_ASSET_BINDINGS",
+    "private_original_path_in_git": false
+  },
+  "/assets/required-06": {
+    "used_in_recipe_fields": [
+      "checkpoint.load_path"
+    ],
+    "resolved_by": "MODEL_ASSET_BINDINGS",
+    "private_original_path_in_git": false
+  },
+  "/assets/required-13": {
+    "used_in_recipe_fields": [
+      "dataloader_train.dataloaders.adaptation.dataloader.dataset.manifest_path"
+    ],
+    "resolved_by": "MODEL_ASSET_BINDINGS",
+    "private_original_path_in_git": false
+  },
+  "/assets/required-14": {
+    "used_in_recipe_fields": [
+      "trainer.callbacks.sft_audit.root"
+    ],
+    "resolved_by": "MODEL_ASSET_BINDINGS",
+    "private_original_path_in_git": false
+  },
+  "/assets/required-15": {
+    "used_in_recipe_fields": [
+      "checkpoint.load_path"
+    ],
+    "resolved_by": "MODEL_ASSET_BINDINGS",
+    "private_original_path_in_git": false
+  },
+  "/assets/required-07": {
+    "used_in_recipe_fields": [
+      "dataloader_train.dataloaders.adaptation.dataloader.dataset.manifest_path"
+    ],
+    "resolved_by": "MODEL_ASSET_BINDINGS",
+    "private_original_path_in_git": false
+  },
+  "/assets/required-08": {
+    "used_in_recipe_fields": [
+      "trainer.callbacks.sft_audit.root"
+    ],
+    "resolved_by": "MODEL_ASSET_BINDINGS",
+    "private_original_path_in_git": false
+  },
+  "/assets/required-09": {
+    "used_in_recipe_fields": [
+      "checkpoint.load_path"
+    ],
+    "resolved_by": "MODEL_ASSET_BINDINGS",
+    "private_original_path_in_git": false
+  },
+  "/assets/required-10": {
+    "used_in_recipe_fields": [
+      "dataloader_train.dataloaders.adaptation.dataloader.dataset.manifest_path"
+    ],
+    "resolved_by": "MODEL_ASSET_BINDINGS",
+    "private_original_path_in_git": false
+  },
+  "/assets/required-11": {
+    "used_in_recipe_fields": [
+      "trainer.callbacks.sft_audit.root"
+    ],
+    "resolved_by": "MODEL_ASSET_BINDINGS",
+    "private_original_path_in_git": false
+  },
+  "/assets/required-12": {
+    "used_in_recipe_fields": [
+      "checkpoint.load_path"
+    ],
+    "resolved_by": "MODEL_ASSET_BINDINGS",
+    "private_original_path_in_git": false
+  }
+}

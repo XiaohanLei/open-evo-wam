@@ -1,0 +1,7 @@
+# Merge these fields into stages.verify in the robotwin pipeline config.
+endpoint: http://127.0.0.1:18881/v1/chat/completions
+model: qwen-small
+model_revision: Qwen2.5-VL-3B-Instruct-local
+api_key_env: null
+max_tokens: 2048
+format_instructions: ${PACKAGE_ROOT}/configs/vlm-qwen-small-format.json

@@ -1,0 +1,44 @@
+schema: evo-wam.pipeline.v1
+run_dir: ${RUN_OUTPUT}
+initial_checkpoint: ${PARENT_CHECKPOINT_PATH}
+stages:
+  evaluate:
+    requires_previous: false
+    checkpoint: ${PARENT_CHECKPOINT_PATH}
+    python: ${COSMOS_PYTHON}
+    adapter: evo_wam.adapters.cosmos_robotwin_evaluate:run
+    source_root: ${NATIVE_ROOT}/cosmos_robotwin_inference
+    robotwin_source: ${ROBOTWIN_SOURCE}
+    assets_root: ${ROBOTWIN_ASSETS}
+    episode_runner: ${PACKAGE_ROOT}/scripts/robotwin_fixed_episode.py
+    robotwin_python: ${ROBOTWIN_PYTHON}
+    model_python: ${COSMOS_PYTHON}
+    model_gpu: 1
+    port: 18874
+    model_env:
+      LD_LIBRARY_PATH: ''
+      COSMOS_TRAINING: '0'
+      COSMOS_INTERNAL: '0'
+      HF_HUB_OFFLINE: '1'
+      TRANSFORMERS_OFFLINE: '1'
+      OMP_NUM_THREADS: '4'
+      MKL_NUM_THREADS: '4'
+    train_config: ${MODEL_TRAIN_CONFIG}
+    statistics: ${MODEL_STATISTICS}
+    registry: ${EVALUATION_REGISTRY}
+    request_timeout: 600
+    episode_timeout: 900
+    native_env:
+      CUDA_VISIBLE_DEVICES: ${RENDER_GPU}
+      LD_LIBRARY_PATH: ''
+      VK_ICD_FILENAMES: ${VULKAN_ICD}
+      ROBOTWIN_VK_ICD_JSON: ${VULKAN_ICD}
+      WANDB_MODE: disabled
+    inputs:
+      - ${PARENT_CHECKPOINT_PATH}/model
+      - ${VULKAN_ICD}
+      - ${ROBOTWIN_SOURCE}/script/eval_policy.py
+      - ${PACKAGE_ROOT}/scripts/robotwin_fixed_episode.py
+      - ${EVALUATION_REGISTRY}
+variables:
+  PACKAGE_ROOT: ${CONFIG_DIR}/..

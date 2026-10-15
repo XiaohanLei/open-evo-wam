@@ -1,0 +1,1 @@
+{"id": "cup-clean-seed0-sample0", "episode_key": "cup-clean-seed0", "scene_set": "A", "repeat_index": 0, "sample_index": 0, "task": "place_empty_cup", "task_config": "demo_clean", "instruction": "Place the empty cup on the coaster.", "initial_observation": "assets/observations/cup-clean-seed0.npz", "max_steps": 192, "seed": 42, "fixed_seed": 0}

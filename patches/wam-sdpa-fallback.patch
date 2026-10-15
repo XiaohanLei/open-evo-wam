@@ -1,0 +1,116 @@
+--- a/cosmos_framework/model/attention/frontend.py
++++ b/cosmos_framework/model/attention/frontend.py
+@@ -21,6 +21,7 @@
+     universal_tensor_checks,
+     varlen_tensor_checks,
+ )
++from cosmos_framework.model.attention.sdpa import sdpa_attention
+ from cosmos_framework.model.attention.flash2 import flash2_attention
+ from cosmos_framework.model.attention.flash3 import flash3_attention
+ from cosmos_framework.model.attention.masks import CausalType
+@@ -31,6 +32,7 @@
+ 
+ # Map backend names to their frontend attention API
+ BACKEND_MAP = {
++    "sdpa": sdpa_attention,
+     "natten": natten_attention,
+     "flash2": flash2_attention,
+     "flash3": flash3_attention,
+@@ -203,20 +205,28 @@
+     if backend is not None and backend not in BACKEND_MAP:
+         raise ValueError(f"Selected {backend=}, but available choices are {BACKEND_MAP.keys()}. ")
+ 
+-    compatible_backend = choose_backend(
+-        query_shape=query.shape,
+-        key_shape=key.shape,
+-        value_shape=value.shape,
+-        dtype=query.dtype,
+-        device=query.device,
+-        requires_grad=query.requires_grad or key.requires_grad or value.requires_grad,
+-        is_causal=is_causal,
+-        causal_type=causal_type,
+-        is_varlen=is_varlen,
+-        deterministic=deterministic,
+-        backend=backend,
+-        raise_error=False,
+-    )
++    if backend == "sdpa":
++        compatible_backend = "sdpa"
++    else:
++        compatible_backend = choose_backend(
++            query_shape=query.shape,
++            key_shape=key.shape,
++            value_shape=value.shape,
++            dtype=query.dtype,
++            device=query.device,
++            requires_grad=query.requires_grad or key.requires_grad or value.requires_grad,
++            is_causal=is_causal,
++            causal_type=causal_type,
++            is_varlen=is_varlen,
++            deterministic=deterministic,
++            backend=backend,
++            raise_error=False,
++        )
++
++
++    # Preserve native backends when available; packed SDPA is the portable fallback.
++    if compatible_backend is None and backend is None and not return_lse:
++        compatible_backend = "sdpa"
+ 
+     # Either incompatible backend specified by user, or no compatible backends found
+     if compatible_backend is None and backend is None:
+--- /dev/null
++++ b/cosmos_framework/model/attention/sdpa.py
+@@ -0,0 +1,52 @@
++"""Portable packed attention, preserving sample boundaries and causal alignment."""
++import torch
++import torch.nn.functional as F
++from cosmos_framework.model.attention.masks import CausalType
++
++
++def sdpa_attention(query, key, value, is_causal=False, causal_type=None, scale=None,
++                   cumulative_seqlen_Q=None, cumulative_seqlen_KV=None,
++                   max_seqlen_Q=None, max_seqlen_KV=None, return_lse=False,
++                   backend_kwargs=None, deterministic=False):
++    if return_lse:
++        raise NotImplementedError('SDPA fallback does not expose logsumexp')
++    if backend_kwargs:
++        raise ValueError('SDPA fallback does not accept native backend arguments')
++    if deterministic and (query.requires_grad or key.requires_grad or value.requires_grad):
++        raise NotImplementedError('Deterministic backward is not validated for SDPA fallback')
++    packed = cumulative_seqlen_Q is not None
++    if packed:
++        if query.shape[0] != 1 or key.shape[0] != 1:
++            raise ValueError('Packed attention requires batch size one')
++        q_offsets = cumulative_seqlen_Q.tolist()
++        k_offsets = cumulative_seqlen_KV.tolist()
++        if len(q_offsets) != len(k_offsets):
++            raise ValueError('Packed sample count differs')
++        parts = [(query[:,qa:qb],key[:,ka:kb],value[:,ka:kb])
++                 for qa,qb,ka,kb in zip(q_offsets,q_offsets[1:],k_offsets,k_offsets[1:])]
++    else:
++        parts = [(query,key,value)]
++    outputs = []
++    for q,k,v in parts:
++        nq,nk = q.shape[1],k.shape[1]
++        if nq == 0:
++            outputs.append(q.new_empty((q.shape[0],0,q.shape[2],v.shape[-1])))
++            continue
++        if nk == 0:
++            outputs.append(q.new_zeros((q.shape[0],nq,q.shape[2],v.shape[-1])))
++            continue
++        causal, mask = False, None
++        if is_causal:
++            if causal_type == CausalType.DontCare and nq != nk:
++                raise ValueError('DontCare causal alignment requires equal sample lengths')
++            if causal_type in (CausalType.TopLeft,CausalType.DontCare):
++                causal = True
++            elif causal_type == CausalType.BottomRight:
++                mask = torch.arange(nk,device=q.device)[None,:] <= torch.arange(nq,device=q.device)[:,None]+nk-nq
++            else:
++                raise ValueError('Unknown causal alignment')
++        result = F.scaled_dot_product_attention(q.transpose(1,2),k.transpose(1,2),
++            v.transpose(1,2),attn_mask=mask,is_causal=causal,dropout_p=0.0,
++            scale=scale,enable_gqa=q.shape[2]!=k.shape[2])
++        outputs.append(result.transpose(1,2))
++    return torch.cat(outputs,dim=1) if packed else outputs[0]

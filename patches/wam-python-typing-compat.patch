@@ -1,0 +1,42 @@
+--- a/cosmos_framework/inference/common/args.py
++++ b/cosmos_framework/inference/common/args.py
+@@ -13,6 +13,7 @@
+ import time
+ from abc import ABC, abstractmethod
+ from pathlib import Path
++from typing_extensions import override
+ from typing import (
+     TYPE_CHECKING,
+     Annotated,
+@@ -22,7 +23,6 @@
+     NoReturn,
+     TypeVar,
+     overload,
+-    override,
+ )
+ 
+ import omegaconf
+--- a/cosmos_framework/inference/inference.py
++++ b/cosmos_framework/inference/inference.py
+@@ -7,7 +7,8 @@
+ from collections.abc import Callable, Generator, Iterable
+ from dataclasses import dataclass
+ from pathlib import Path
+-from typing import TYPE_CHECKING, Any, Literal, Sequence, TypeVar, cast, override
++from typing_extensions import override
++from typing import TYPE_CHECKING, Any, Literal, Sequence, TypeVar, cast
+ 
+ import attrs
+ import cattrs
+--- a/cosmos_framework/inference/args.py
++++ b/cosmos_framework/inference/args.py
+@@ -6,7 +6,8 @@
+ import os
+ from functools import cache
+ from pathlib import Path
+-from typing import TYPE_CHECKING, Annotated, Any, ClassVar, Literal, Self, cast, override
++from typing_extensions import override
++from typing import TYPE_CHECKING, Annotated, Any, ClassVar, Literal, Self, cast
+ 
+ import pydantic
+ import pynvml

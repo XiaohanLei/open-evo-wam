@@ -1,0 +1,9 @@
+{
+  "place_empty_cup": "The original cup is visibly placed on the coaster, not beside it or held above it.",
+  "place_bread_basket": "All originally present/instructed bread pieces are in the basket, not one missing or held above it.",
+  "stamp_seal": "The original seal is placed on the instructed colored target patch. Do not require an ink mark or a pressing event: this task is target placement.",
+  "place_object_scale": "The original instructed object is on the weighing platform, not beside the scale or held above it.",
+  "stack_blocks_three": "The three original blocks form one three-level stack: red bottom, green middle, blue top. Side-by-side ranking is not success.",
+  "place_a2b_left": "The original instructed object A is placed to the left of reference object B in the scene, approximately aligned front-to-back with a moderate gap. Do not require the same object appearance as unrelated success references.",
+  "place_cans_plasticbox": "Both original instructed cans are placed inside the plastic box, not only one, outside behind it, or held above the box."
+}

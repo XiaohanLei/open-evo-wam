@@ -1,0 +1,16 @@
+--- a/cosmos_framework/inference/robotwin_dense_http_client.py
++++ b/cosmos_framework/inference/robotwin_dense_http_client.py
+@@ -351,7 +351,12 @@
+     for action in actions:
+         if TASK_ENV.eval_success or TASK_ENV.take_action_cnt >= TASK_ENV.step_lim:
+             break
+-        TASK_ENV.take_action(action, action_type="qpos", render=True)
++        # Public RoboTwin renders inside take_action; historical variants expose a flag.
++        import inspect
++        options = {"action_type": "qpos"}
++        if "render" in inspect.signature(TASK_ENV.take_action).parameters:
++            options["render"] = True
++        TASK_ENV.take_action(action, **options)
+         model.record_execution(action, TASK_ENV.get_obs())
+     if TASK_ENV.eval_success or TASK_ENV.take_action_cnt >= TASK_ENV.step_lim or model.mode == "self_imagine":
+         model.termination = {

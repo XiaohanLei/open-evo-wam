@@ -1,0 +1,10 @@
+# Copy into .private/ and fill actual local/A6000 paths. Never commit credentials.
+export NATIVE_ROOT="$PWD/.native"
+export RUN_OUTPUT="$PWD/run-output/robotwin"
+export MODEL_ASSET_BINDINGS="$PWD/.private/asset-bindings.json"
+# Required variables for each profile are listed by `evo-wam doctor`.
+# VLM credentials must remain in the environment or an ignored local file.
+
+# Top-level Python package supplied by your native IDM installation.
+# This value must match its actual importable name; it does not rename the package.
+export IDM_PACKAGE="idm"

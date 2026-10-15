@@ -1,0 +1,65 @@
+--- a/groot/vla/model/dreamzero/action_head/wan_flow_matching_action_tf.py
++++ b/groot/vla/model/dreamzero/action_head/wan_flow_matching_action_tf.py
+@@ -1084,33 +1084,35 @@
+             num_dit_steps=num_dit_steps,
+         )
+         
+-        text_enc_path = ensure_file(
+-            self.text_encoder.text_encoder_pretrained_path,
+-            "models_t5_umt5-xxl-enc-bf16.pth",
+-        )
+-        _startup_log(f"loading text encoder weights from {text_enc_path}")
+-        self.text_encoder.load_state_dict(torch.load(text_enc_path, map_location='cpu'))
+-        _startup_log("text encoder weights loaded")
+-
+-        img_enc_path = ensure_file(
+-            self.image_encoder.image_encoder_pretrained_path,
+-            "models_clip_open-clip-xlm-roberta-large-vit-huge-14.pth",
+-        )
+-        _startup_log(f"loading image encoder weights from {img_enc_path}")
+-        self.image_encoder.model.load_state_dict(torch.load(img_enc_path, map_location='cpu'), strict=False)
+-        _startup_log("image encoder weights loaded")
+-
+-        # Wan2.2 (WanVideoVAE38, z_dim=48) uses Wan2.2_VAE.pth; Wan2.1 uses Wan2.1_VAE.pth
+-        vae_hf_filename = "Wan2.2_VAE.pth" if getattr(self.vae, "z_dim", 16) == 48 else "Wan2.1_VAE.pth"
+-        vae_repo_id = WAN22_HF_REPO_ID if getattr(self.vae, "z_dim", 16) == 48 else WAN_HF_REPO_ID
+-        vae_path = ensure_file(
+-            self.vae.vae_pretrained_path,
+-            vae_hf_filename,
+-            repo_id=vae_repo_id,
+-        )
+-        _startup_log(f"loading vae weights from {vae_path}")
+-        self.vae.model.load_state_dict(torch.load(vae_path, map_location='cpu'))
+-        _startup_log("vae weights loaded")
++        # Full exports contain these components; strict_load verifies all keys.
++        if not config.skip_component_loading:
++            text_enc_path = ensure_file(
++                self.text_encoder.text_encoder_pretrained_path,
++                "models_t5_umt5-xxl-enc-bf16.pth",
++            )
++            _startup_log(f"loading text encoder weights from {text_enc_path}")
++            self.text_encoder.load_state_dict(torch.load(text_enc_path, map_location='cpu'))
++            _startup_log("text encoder weights loaded")
++
++            img_enc_path = ensure_file(
++                self.image_encoder.image_encoder_pretrained_path,
++                "models_clip_open-clip-xlm-roberta-large-vit-huge-14.pth",
++            )
++            _startup_log(f"loading image encoder weights from {img_enc_path}")
++            self.image_encoder.model.load_state_dict(torch.load(img_enc_path, map_location='cpu'), strict=False)
++            _startup_log("image encoder weights loaded")
++
++            # Wan2.2 (WanVideoVAE38, z_dim=48) uses Wan2.2_VAE.pth; Wan2.1 uses Wan2.1_VAE.pth
++            vae_hf_filename = "Wan2.2_VAE.pth" if getattr(self.vae, "z_dim", 16) == 48 else "Wan2.1_VAE.pth"
++            vae_repo_id = WAN22_HF_REPO_ID if getattr(self.vae, "z_dim", 16) == 48 else WAN_HF_REPO_ID
++            vae_path = ensure_file(
++                self.vae.vae_pretrained_path,
++                vae_hf_filename,
++                repo_id=vae_repo_id,
++            )
++            _startup_log(f"loading vae weights from {vae_path}")
++            self.vae.model.load_state_dict(torch.load(vae_path, map_location='cpu'))
++            _startup_log("vae weights loaded")
+         self.vae.rlinf_enable_batch_encode = _resolve_rlinf_flag(
+             config.rlinf_enable_vae_batch_encode,
+             "DREAMZERO_RLINF_VAE_BATCH_ENCODE",

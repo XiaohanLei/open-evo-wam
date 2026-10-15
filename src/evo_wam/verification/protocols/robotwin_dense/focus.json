@@ -1,0 +1,9 @@
+{
+  "place_empty_cup": "cup, coaster, manipulating grippers; relative positions, visible contact and occlusion",
+  "place_bread_basket": "every bread piece, basket, manipulating grippers; object count, relative positions, visible contact and occlusion",
+  "stamp_seal": "seal, colored patches, manipulating grippers; appearances, relative positions, visible contact and occlusion",
+  "place_object_scale": "movable tabletop objects, scale body and weighing platform, manipulating grippers; appearances, relative positions, visible contact and occlusion",
+  "stack_blocks_three": "each red, green and blue block, manipulating grippers; individual shape, relative positions, visible contact and occlusion",
+  "place_a2b_left": "distinct tabletop objects and manipulating grippers; appearances, left/right and front/back relations in the head view, visible contact and occlusion",
+  "place_cans_plasticbox": "each can, plastic box, manipulating grippers; individual shapes, counts, relative positions, visible contact and occlusion"
+}

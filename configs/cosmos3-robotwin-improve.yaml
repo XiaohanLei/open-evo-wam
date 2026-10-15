@@ -1,0 +1,110 @@
+schema: evo-wam.pipeline.v1
+run_dir: ${RUN_OUTPUT}
+initial_checkpoint: ${PARENT_CHECKPOINT_PATH}
+stages:
+  generate:
+    python: ${COSMOS_PYTHON}
+    adapter: evo_wam.adapters.cosmos:generate_robotwin
+    source_root: ${NATIVE_ROOT}/cosmos_robotwin_inference
+    train_config: ${MODEL_TRAIN_CONFIG}
+    statistics: ${MODEL_STATISTICS}
+    jobs: ${GENERATION_JOBS_ROOT}/R${ROUND}.jsonl
+    num_steps: 30
+    guidance: 1.0
+    shift: 5.0
+  verify:
+    python: ${IDM_PYTHON}
+    adapter: evo_wam.verification.robotwin:verify
+    source_root: ${NATIVE_ROOT}/idm_dense
+    idm_checkpoint: ${IDM_CHECKPOINT}
+    tokenizer: ${UMT5_TOKENIZER}
+    interface: dense
+    backbone: cosmos3-robotwin
+    visual_protocol: robotwin_dense
+    seed_namespace: evo-wam-robotwin-R${ROUND}
+    threshold: 0.004184869576192262
+    scan_start_seconds:
+      place_empty_cup: 8
+      place_bread_basket: 8
+      stamp_seal: 8
+      place_object_scale: 8
+      place_a2b_left: 8
+      place_cans_plasticbox: 12
+      stack_blocks_three: 30
+    endpoint: ${VLM_ENDPOINT}
+    model: ${VLM_MODEL}
+    model_revision: ${VLM_MODEL_REVISION}
+    vote_timing: per_moment
+    inputs:
+    - ${IDM_CHECKPOINT}
+    - ${UMT5_TOKENIZER}
+  export-prefix:
+    python: ${COSMOS_PYTHON}
+    adapter: evo_wam.data.robotwin_dense_online:export
+    source_root: ${NATIVE_ROOT}/cosmos_robotwin_inference
+    statistics: ${MODEL_STATISTICS}
+    loader_template: ${NATIVE_LOADER_MANIFEST}
+    threshold: 0.004184869576192262
+    cumulative: true
+    selection_description: Native dense IDM consistency filtering then chronological fixed-point
+      vote3
+    inputs:
+    - ${MODEL_STATISTICS}
+    - ${NATIVE_LOADER_MANIFEST}
+  train:
+    python: ${COSMOS_PYTHON}
+    adapter: evo_wam.adapters.cosmos_robotwin_train:train
+    package_root: ${PACKAGE_ROOT}
+    source_root: ${NATIVE_ROOT}/cosmos_robotwin_inference
+    recipe: robotwin
+    statistics: ${MODEL_STATISTICS}
+    vae: ${WAN_VAE_PATH}
+    base_data: ${ROBOTWIN_BASE_DATA}
+    aux_manifest: ${ROBOTWIN_AUX_MANIFEST}
+    master_addr: ${MASTER_ADDR}
+    master_port: ${MASTER_PORT}
+    inputs:
+    - ${WAN_VAE_PATH}
+    - ${ROBOTWIN_BASE_DATA}
+    - ${ROBOTWIN_AUX_MANIFEST}
+    code_inputs:
+    - ${NATIVE_ROOT}/cosmos_robotwin_inference
+    - ${PACKAGE_ROOT}/recipes/robotwin/r1.yaml
+    - ${PACKAGE_ROOT}/recipes/robotwin/r2.yaml
+    - ${PACKAGE_ROOT}/recipes/robotwin/r3.yaml
+    - ${PACKAGE_ROOT}/recipes/robotwin/r4.yaml
+    recipe_configs:
+      1: ${PACKAGE_ROOT}/recipes/robotwin/r1.yaml
+      2: ${PACKAGE_ROOT}/recipes/robotwin/r2.yaml
+      3: ${PACKAGE_ROOT}/recipes/robotwin/r3.yaml
+      4: ${PACKAGE_ROOT}/recipes/robotwin/r4.yaml
+    bindings_file: ${MODEL_ASSET_BINDINGS}
+  evaluate:
+    python: ${COSMOS_PYTHON}
+    adapter: evo_wam.adapters.cosmos_robotwin_evaluate:run
+    source_root: ${NATIVE_ROOT}/cosmos_robotwin_inference
+    robotwin_source: ${ROBOTWIN_SOURCE}
+    assets_root: ${ROBOTWIN_ASSETS}
+    episode_runner: ${PACKAGE_ROOT}/scripts/robotwin_fixed_episode.py
+    robotwin_python: ${ROBOTWIN_PYTHON}
+    model_python: ${COSMOS_PYTHON}
+    model_gpu: 0
+    port: 18874
+    model_env:
+      LD_LIBRARY_PATH: ''
+    train_config: ${MODEL_TRAIN_CONFIG}
+    statistics: ${MODEL_STATISTICS}
+    registry: ${EVALUATION_REGISTRY}
+    request_timeout: 600
+    episode_timeout: 900
+    native_env:
+      CUDA_VISIBLE_DEVICES: ${RENDER_GPU}
+      LD_LIBRARY_PATH: ''
+      VK_ICD_FILENAMES: ${VULKAN_ICD}
+      ROBOTWIN_VK_ICD_JSON: ${VULKAN_ICD}
+    inputs:
+    - ${VULKAN_ICD}
+    - ${ROBOTWIN_SOURCE}/script/eval_policy.py
+    - ${PACKAGE_ROOT}/scripts/robotwin_fixed_episode.py
+variables:
+  PACKAGE_ROOT: ${CONFIG_DIR}/..

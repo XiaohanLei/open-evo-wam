@@ -1,0 +1,20 @@
+# Isolated Python 3.10 simulator environment; PyTorch uses the cu121 wheel index.
+# CuRobo is built separately from Git commit 2fbffc35225398cf9d5f382804faa9de2608753b.
+setuptools==75.8.0
+sapien==3.0.0b1
+mplib==0.2.1
+numpy==1.26.4
+scipy==1.15.3
+transforms3d==0.4.2
+trimesh==4.4.3
+open3d==0.18.0
+opencv-python-headless==4.10.0.84
+PyYAML==6.0.3
+h5py==3.16.0
+imageio==2.34.2
+gymnasium==0.29.1
+toppra==0.6.3
+zarr==2.18.3
+requests==2.34.2
+warp-lang==1.6.2
+ninja==1.13.0
